@@ -96,6 +96,7 @@ import type { useRouter } from 'vue-router';
 import { useClipboard } from '@/composables/useClipboard';
 import { useUniqueNodeName } from '@/composables/useUniqueNodeName';
 import { isPresent } from '../utils/typesUtils';
+import { mutateNodesForConnection } from '@/utils/connectionNodesMutator';
 
 type AddNodeData = Partial<INodeUi> & {
 	type: string;
@@ -601,6 +602,7 @@ export function useCanvasOperations({ router }: { router: ReturnType<typeof useR
 			throw new Error(i18n.baseText('nodeViewV2.showError.failedToCreateNode'));
 		}
 
+		// Note that nodeData may yet be manipulated by the connection creation below
 		workflowsStore.addNode(nodeData);
 
 		if (options.trackHistory) {
@@ -1103,6 +1105,8 @@ export function useCanvasOperations({ router }: { router: ReturnType<typeof useR
 		if (!isConnectionAllowed(sourceNode, targetNode, mappedConnection[0], mappedConnection[1])) {
 			return;
 		}
+
+		mutateNodesForConnection(sourceNode, targetNode);
 
 		workflowsStore.addConnection({
 			connection: mappedConnection,
